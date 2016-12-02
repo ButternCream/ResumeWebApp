@@ -89,4 +89,24 @@ router.get('/delete', function(req, res){
     }
 });
 
+//Create procedure with 3 select statements to select skill, company and school
+router.get('/edit', function(req, res){
+    if(req.query.resume_id == null) {
+        res.send('A resume id is required');
+    }
+    else {
+        account_dal.edit(req.query.resume_id, function(err, result){
+            console.log(result);
+            res.render('resume/resumeUpdate', {resume: result[0][0], skill: result[1], school: result[2], company: result[3]});
+        });
+    }
+
+});
+
+router.get('/update', function(req, res) {
+    account_dal.update(req.query, function(err, result){
+        res.redirect(302, '/resume/all');
+    });
+});
+
 module.exports = router;
