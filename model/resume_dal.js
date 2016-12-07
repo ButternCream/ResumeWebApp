@@ -49,34 +49,68 @@ exports.delete = function(resume_id, callback) {
 */
 
 //declare the function so it can be used locally
-var resumeSkillInsert = function(resume_id, skillIdArray, callback){
+var resumeInsertAll = function(resume_id, skillIdArray, schoolIdArray, companyIdArray, callback){
     // NOTE THAT THERE IS ONLY ONE QUESTION MARK IN VALUES ?
     var query = 'INSERT INTO resume_skill (resume_id, skill_id) VALUES ?';
-
+    var query2 = 'INSERT INTO resume_school (resume_id, school_id) VALUES ?';
+    var query3 = 'INSERT INTO resume_company (resume_id, company_id) VALUES ?';
     // TO BULK INSERT RECORDS WE CREATE A MULTIDIMENSIONAL ARRAY OF THE VALUES
     var resumeSkillData = [];
     for(var i=0; i < skillIdArray.length; i++) {
         resumeSkillData.push([resume_id, skillIdArray[i]]);
     }
+    var resumeSchoolData = [];
+    for(i=0; i < schoolIdArray.length; i++) {
+        resumeSchoolData.push([resume_id, schoolIdArray[i]]);
+    }
+    var resumeCompanyData = [];
+    for(i=0; i < companyIdArray.length; i++) {
+        resumeCompanyData.push([resume_id, companyIdArray[i]]);
+    }
+
     connection.query(query, [resumeSkillData], function(err, result){
-        callback(err, result);
+        if (err){
+            callback(err, result);
+        }
+        connection.query(query2, [resumeSchoolData], function(err, result){
+           if (err){
+               callback(err, result);
+           }
+           connection.query(query3, [resumeCompanyData], function(err, result){
+              callback(err, result);
+           });
+        });
     });
 };
 
 //export the same function so it can be used by external callers
-module.exports.resumeSkillInsert = resumeSkillInsert;
+module.exports.resumeInsertAll = resumeInsertAll;
 
 //declare the function so it can be used locally
-var resumeSkillDeleteAll = function(resume_id, callback){
+var resumeDeleteAll = function(resume_id, callback){
     var query = 'DELETE FROM resume_skill WHERE resume_id = ?';
+    var query2 = 'DELETE FROM resume_school WHERE resume_id = ?';
+    var query3 = 'DELETE FROM resume_company WHERE resume_id = ?';
     var queryData = [resume_id];
 
     connection.query(query, queryData, function(err, result) {
-        callback(err, result);
+        if (err){
+            callback(err, result);
+        }
+        connection.query(query2, queryData, function(err, result) {
+            if (err){
+                callback(err, result);
+            }
+            connection.query(query3, queryData, function(err, result) {
+                callback(err ,result);
+
+            });
+        });
+
     });
 };
 //export the same function so it can be used by external callers
-module.exports.resumeSkillDeleteAll = resumeSkillDeleteAll;
+module.exports.resumeDeleteAll = resumeDeleteAll;
 
 exports.update = function(params, callback) {
     var query = 'UPDATE resume SET resume_name = ? WHERE resume_id = ?';
@@ -84,18 +118,16 @@ exports.update = function(params, callback) {
 
     connection.query(query, queryData, function(err, result) {
         //delete company_address entries for this company
-        resumeSkillDeleteAll(params.resume_id, function(err, result){
-
+        resumeDeleteAll(params.resume_id, function(err, result){
             if(params.skill_id != null) {
                 //insert company_address ids
-                resumeSkillInsert(params.resume_id, params.skill_id, function(err, result){
+                resumeInsertAll(params.resume_id, params.skill_id, params.school_id, params.company_id, function(err, result){
                     callback(err, result);
                 });}
             else {
                 callback(err, result);
             }
         });
-
     });
 };
 
@@ -126,4 +158,4 @@ exports.edit = function(resume_id, callback) {
     connection.query(query, queryData, function (err, result) {
         callback(err, result);
     });
-}
+};

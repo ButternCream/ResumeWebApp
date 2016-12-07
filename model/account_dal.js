@@ -57,7 +57,7 @@ exports.update = function(params, callback) {
 };
 
 exports.edit = function(account_id, callback) {
-    var query = 'select * from account';
+    var query = 'select * from account where account_id = ?';
     var queryData = [account_id];
 
     connection.query(query, queryData, function(err, result) {
