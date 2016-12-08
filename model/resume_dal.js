@@ -51,17 +51,34 @@ var resumeInsertAll = function(resume_id, skillIdArray, schoolIdArray, companyId
     var query3 = 'INSERT INTO resume_company (resume_id, company_id) VALUES ?';
     // TO BULK INSERT RECORDS WE CREATE A MULTIDIMENSIONAL ARRAY OF THE VALUES
     var resumeSkillData = [];
-    for(var i=0; i < skillIdArray.length; i++) {
-        resumeSkillData.push([resume_id, skillIdArray[i]]);
+    if (skillIdArray instanceof Array){
+        for(var i=0; i < skillIdArray.length; i++) {
+            resumeSkillData.push([resume_id, skillIdArray[i]]);
+        }
+    } else{
+        resumeSkillData.push([resume_id, skillIdArray]);
     }
+
     var resumeSchoolData = [];
-    for(i=0; i < schoolIdArray.length; i++) {
-        resumeSchoolData.push([resume_id, schoolIdArray[i]]);
+    if (schoolIdArray instanceof Array){
+        for(i=0; i < schoolIdArray.length; i++) {
+            resumeSchoolData.push([resume_id, schoolIdArray[i]]);
+        }
+    } else{
+        resumeSchoolData.push([resume_id, schoolIdArray]);
     }
+
     var resumeCompanyData = [];
-    for(i=0; i < companyIdArray.length; i++) {
-        resumeCompanyData.push([resume_id, companyIdArray[i]]);
+    if (resumeCompanyData instanceof Array){
+        for(i=0; i < companyIdArray.length; i++) {
+            resumeCompanyData.push([resume_id, companyIdArray[i]]);
+        }
     }
+    else{
+        resumeCompanyData.push([resume_id, companyIdArray]);
+    }
+
+
 
     connection.query(query, [resumeSkillData], function(err, result){
         if (err){
