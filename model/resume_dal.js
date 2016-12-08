@@ -12,6 +12,14 @@ exports.getAll = function(callback) {
     });
 };
 
+exports.getAllAdd = function(callback) {
+    var query = 'CALL resume_add_getInfo();';
+
+    connection.query(query, function(err, result) {
+        callback(err, result);
+    });
+};
+
 exports.getById = function(school_id, callback) {
     var query = 'SELECT * FROM resume_view WHERE resume_id = ?';
     var queryData = [school_id];
@@ -19,19 +27,6 @@ exports.getById = function(school_id, callback) {
     connection.query(query, queryData, function(err, result) {
         callback(err, result);
     });
-};
-
-exports.insert = function(params, callback) {
-    var query = 'INSERT INTO resume (resume_name, account_id) VALUES (?, ?)';
-
-    // the question marks in the sql query above will be replaced by the values of the
-    // the data in queryData
-    var queryData = [params.resume_name, params.account_id];
-
-    connection.query(query, queryData, function(err, result) {
-        callback(err, result);
-    });
-
 };
 
 exports.delete = function(resume_id, callback) {
@@ -111,6 +106,26 @@ var resumeDeleteAll = function(resume_id, callback){
 };
 //export the same function so it can be used by external callers
 module.exports.resumeDeleteAll = resumeDeleteAll;
+
+exports.insert = function(params, callback) {
+    var query = 'INSERT INTO resume (resume_name, account_id) VALUES (?, ?)';
+
+    // the question marks in the sql query above will be replaced by the values of the
+    // the data in queryData
+    var queryData = [params.resume_name, params.account_id];
+
+    connection.query(query, queryData, function(err, result) {
+        if(params.skill_id != null && params.school_id != null && params.company_id != null && result.insertId != null) {
+            //insert company_address ids
+            resumeInsertAll(result.insertId, params.skill_id, params.school_id, params.company_id, function(err, result){
+                callback(err, result);
+            });}
+        else {
+            console.log("Nulls");
+            callback(err, result);
+        }
+    });
+};
 
 exports.update = function(params, callback) {
     var query = 'UPDATE resume SET resume_name = ? WHERE resume_id = ?';

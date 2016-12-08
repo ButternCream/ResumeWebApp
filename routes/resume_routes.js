@@ -38,12 +38,12 @@ router.get('/', function(req, res){
 // Return the add a new school form
 router.get('/add', function(req, res){
     // passing all the query parameters (req.query) to the insert function instead of each individually
-    account_dal.getAll(function(err,result) {
+    account_dal.getAllAdd(function(err,result) {
         if (err) {
             res.send(err);
         }
         else {
-            res.render('resume/resumeAdd', {'resume': result});
+            res.render('resume/resumeAdd', {'skill': result[0], 'school': result[1], 'company': result[2], 'account': result[3]});
         }
     });
 });
